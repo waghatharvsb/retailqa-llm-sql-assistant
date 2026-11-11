@@ -1,0 +1,10 @@
+.env
+.git
+db
+mysql-init
+*.ipynb
+__pycache__
+*.pyc
+db_test.py
+llm_test.py
+validate_few_shots.py
