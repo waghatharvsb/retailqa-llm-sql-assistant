@@ -11,3 +11,5 @@ sentence-transformers==5.5.1
 SQLAlchemy==2.0.50
 streamlit==1.58.0
 cryptography
+mcp==1.28.1
+langchain-mcp-adapters==0.2.0

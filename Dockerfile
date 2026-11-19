@@ -25,7 +25,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Bake the embedding model into the image
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
 
-COPY few_shots.py langchain_helper.py main.py ./
+COPY few_shots.py sql_guard.py mcp_server.py agent.py agent_service.py main.py ./
 
 EXPOSE 8501
 CMD ["streamlit", "run", "main.py", "--server.address=0.0.0.0", "--server.port=8501", "--browser.gatherUsageStats=false"]

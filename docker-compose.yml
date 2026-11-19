@@ -14,16 +14,39 @@ services:
       timeout: 3s
       retries: 20
 
-  app:
-    build: .
+  mcp:
+    image: retailqa-app:latest
     restart: unless-stopped
+    command: ["python", "mcp_server.py"]
     depends_on:
       mysql:
         condition: service_healthy
-    env_file: .env
     environment:
+      MCP_TRANSPORT: streamable-http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8000"
       DB_HOST: mysql
       DB_PORT: "3306"
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      HF_HUB_OFFLINE: "1"
+      ANONYMIZED_TELEMETRY: "False"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 8000), 2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    image: retailqa-app:latest
+    restart: unless-stopped
+    depends_on:
+      mcp:
+        condition: service_healthy
+    environment:
+      MCP_URL: http://mcp:8000/mcp
       OLLAMA_URL: http://host.docker.internal:11434
     extra_hosts:
       - "host.docker.internal:host-gateway"

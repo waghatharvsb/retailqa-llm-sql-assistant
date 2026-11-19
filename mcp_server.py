@@ -13,7 +13,11 @@ from few_shots import few_shots
 
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
-mcp = FastMCP("retail-sql-tools")
+mcp = FastMCP(
+    "retail-sql-tools",
+    host=os.getenv("MCP_HOST", "127.0.0.1"),
+    port=int(os.getenv("MCP_PORT", "8000")),
+)
 
 engine = create_engine(
     URL.create(
@@ -37,11 +41,11 @@ def get_schema() -> str:
 
 
 @mcp.tool()
-def run_sql(sql_query: str) -> str:
+def run_sql(sql_query: str = "", query: str = "") -> str:
     """Run ONE read-only MySQL SELECT query and return up to 50 rows as text.
     The argument sql_query is the full SQL string.
     If the result starts with 'ERROR', read the message, fix the query and try again."""
-    sql = clean_sql(sql_query)
+    sql = clean_sql(sql_query or query)
     if not is_safe_select(sql):
         return "ERROR: only a single read-only SELECT query is allowed."
     try:
@@ -78,4 +82,7 @@ def search_examples(question: str) -> str:
     return "\n\n".join(f"Question: {e['Question']}\nSQLQuery: {e['SQLQuery']}" for e in ex)
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    if os.getenv("MCP_TRANSPORT", "stdio") == "stdio":
+        mcp.run(transport="stdio")
+    else:
+        mcp.run(transport="streamable-http")

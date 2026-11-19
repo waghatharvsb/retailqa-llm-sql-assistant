@@ -33,13 +33,17 @@ class AgentService:
 
     async def _main(self):
         try:
-            client = MultiServerMCPClient({
-                "retail": {
+            MCP_URL = os.getenv("MCP_URL")
+            if MCP_URL:   # Docker: connect to the MCP service over HTTP
+                conn = {"transport": "streamable_http", "url": MCP_URL}
+            else:         # local dev: start the server as a subprocess
+                conn = {
                     "transport": "stdio",
                     "command": sys.executable,
                     "args": [os.path.join(HERE, "mcp_server.py")],
+                    "env": dict(os.environ),
                 }
-            })
+            client = MultiServerMCPClient({"retail": conn})
             # session stays open for the whole app lifetime
             async with client.session("retail") as session:
                 tools = await load_mcp_tools(session)
