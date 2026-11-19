@@ -1,24 +1,25 @@
 import streamlit as st
-from langchain_helper import get_few_shot_db_chain
+from agent_service import AgentService
 
-st.title("AtliQ T Shirts: Database Q&A 👕")
+st.title("AtliQ T Shirts: Agentic Database Q&A 👕")
 
 
-@st.cache_resource(show_spinner="Loading model and examples...")
-def load_chain():
-    return get_few_shot_db_chain()
+@st.cache_resource(show_spinner="Starting MCP server and agent...")
+def load_agent():
+    return AgentService()
 
 
 question = st.text_input("Question: ")
 
 if question:
-    chain = load_chain()
+    svc = load_agent()
     with st.spinner("Thinking..."):
-        response = chain(question)
+        r = svc.ask(question)
 
     st.header("Answer")
-    st.write(response["answer"])
+    st.write(r["answer"])
 
-    with st.expander("Show SQL and raw result"):
-        st.code(response["sql"], language="sql")
-        st.text(response["result"] or "")
+    with st.expander("Show tool calls, SQL and raw result"):
+        st.code("\n".join(r["steps"]) or "no tool calls")
+        st.code(r["sql"] or "", language="sql")
+        st.text(r["result"] or "")
