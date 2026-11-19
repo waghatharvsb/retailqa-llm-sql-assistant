@@ -163,3 +163,13 @@ _To be added: accuracy of the baseline chain vs. the MCP agent on a custom quest
 ## License
 
 MIT
+
+## Run with Docker
+
+```bash
+cp .env.example .env     # fill in DB_USER, DB_PASSWORD, DB_NAME, MYSQL_ROOT_PASSWORD
+ollama pull llama3.1     # Ollama runs on the host and must listen on 0.0.0.0
+docker compose up --build
+```
+
+Open http://localhost:8501. Three containers start: `mysql` (database), `mcp` (MCP server, internal only) and `app` (Streamlit + agent). Only the `mcp` container has database credentials.
